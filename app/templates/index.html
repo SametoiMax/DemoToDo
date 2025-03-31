@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+{% import "task_list.html" as macros %}
+
+<div class="flex-container">
+  <!-- Левая колонка: дерево задач -->
+  <div class="left-pane">
+
+    {% include "task_form.html" %}
+
+    <ul>
+      {% for task in tasks %}
+        {{ macros.render_task(task, current_task_id) }}
+      {% endfor %}
+    </ul>
+  </div>
+
+  <!-- Правая колонка: календарь -->
+  <div class="right-pane">
+    <div id="calendar"></div>
+  </div>
+</div>
+
+<!-- Подключаем jQuery и jQuery UI для внутреннего перетаскивания -->
+<script src="../static/lib/jquery-3.6.0.min.js"></script>
+<script src="../static/lib/jquery-ui.min.js"></script>
+
+<!-- Подключаем FullCalendar (с плагином interaction) для переноса в календарь -->
+<script src="../static/lib/fullcalendar-6.1.15/dist/index.global.min.js"></script>
+
+<!-- Сначала файл с объектом CalendarDrag -->
+<script src="../static/Scripts/calendar_drag.js"></script>
+<script src="../static/Scripts/calendar_actions.js"></script>
+<script src="../static/Scripts/calendar_buttons.js"></script>
+<script src="../static/Scripts/calendar_init.js"></script>
+
+<!-- Скрипт для внутреннего перетаскивания дерева -->
+<script src="../static/Scripts/drag_drop.js"></script>
+
+<!-- Прочие скрипты -->
+<script src="../static/Scripts/tasks_collapse.js"></script>
+<script src="../static/Scripts/tasks-completed.js"></script>
+<script src="../static/Scripts/set_current_task.js"></script>
+<script src="../static/Scripts/priority.js"></script>
+<script src="../static/Scripts/prefix_cleaner.js"></script>
+
+{% endblock %}

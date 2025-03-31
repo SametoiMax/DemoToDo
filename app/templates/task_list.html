@@ -1,0 +1,112 @@
+{% macro render_task(task, current_task_id, hidden=False, completed_filter=None) %}
+    {% if completed_filter is not none %}
+        {% if completed_filter == 'completed' and task['completed_at'] is none %}
+            {% set ns = namespace(OutOk=0) %}  {# Пропускаем невыполненные задачи #}
+        {% elif completed_filter == 'not_completed' and task['completed_at'] is not none %}
+            {% set ns = namespace(OutOk=0) %}  {# Пропускаем выполненные задачи #}
+        {% else %}
+            {% set ns = namespace(OutOk=1) %}  {# Продолжаем выводить задачу #}
+        {% endif %}
+    {% else %}
+        {% set ns = namespace(OutOk=1) %}  {# Если фильтр не установлен, выводим все задачи #}
+    {% endif %}
+
+    {% if ns.OutOk == 1 %}  {# Проверяем, что задача должна быть отображена #}
+    <li class="task
+        {% if current_task_id is defined and task['id']|int == current_task_id|int %} current-task{% endif %}
+        {% if task['subtasks'] %} top-level-task{% endif %}
+        {% if not task['subtasks'] %} down-level-task{% endif %}
+        {% if hidden %} hidden-task{% endif %}"
+        data-task-id="{{ task.id }}"
+        data-completed="{{ task['completed_at'] is not none }}"
+        data-priority="{{ task['priority']|default(1) }}"
+        {% if task['started_at'] or task['completed_at'] %}
+            data-tooltip="
+                {% if task['started_at'] %}<strong>Начало:</strong> {{ task['started_at'] }}<br>{% endif %}
+                {% if task['completed_at'] %}<strong>Окончание:</strong> {{ task['completed_at'] }}{% endif %}
+            "
+        {% endif %}
+    >
+        <!-- Контейнер для дроп-зоны -->
+        <div class="droppable-area" data-task-id="{{ task.id }}">
+            <!-- Звёздочка для внутреннего переноса (jQuery UI) -->
+            <span class="priority-star draggable-task {% if task['completed_at'] %}done{% endif %}"
+                data-task-id="{{ task.id }}"
+                data-priority="{{ task['priority']|default(1) }}">
+                ★
+            </span>
+
+            {% if task['subtasks'] %}
+                <span class="toggle-subtasks" data-task-id="{{ task['id'] }}">▼</span>
+            {% endif %}
+
+            <!-- Основной текст задачи для переноса в календарь (FullCalendar) -->
+            <span class="task-text tooltip-trigger">
+                {% if current_task_id is defined and task['id']|int == current_task_id|int %}🎯{% else %}▪{% endif %}
+                <a href="/edit/{{ task['id'] }}"
+                   class="task-link fc-draggable {% if task['completed_at'] %}done{% endif %}"
+                   data-task-id="{{ task.id }}"
+                   data-parent-id="{{ task.parent_id }}"
+                   data-event='{"id":"{{ task.id }}","title":"{{ task.content|replace('"','\\"') }}"}'>
+                    {{ task['content'] }}
+                </a>
+            </span>
+
+            <!-- Кнопка выполнения задачи -->
+            {% if (not task['subtasks'] or task['all_subtasks_done']) and not task['parent_done'] %}
+                <a href="/done/{{ task['id'] }}" class="done-button" draggable="false">✔</a>
+            {% endif %}
+
+            <!-- Кнопка "Сделать текущей" -->
+            {% if not task['completed_at'] and not task['subtasks'] and not task['parent_done'] and task['id'] != current_task_id %}
+                <a href="#" onclick="setCurrentTask({{ task['id'] }})" title="Сделать текущей" class="set-current" draggable="false">🎯</a>
+            {% endif %}
+        </div>
+
+        <!-- Комментарий к задаче -->
+        {% if task['comment'] %}
+            <div class="task-comment {% if task['completed_at'] %}done{% endif %}">{{ task['comment'] }}</div>
+        {% endif %}
+
+        <!-- Подзадачи невыполненные -->
+        {% if task['subtasks'] %}
+            <ul class="subtasks {% if hidden %}hidden-task{% endif %} not-completed-subtasks">
+                {% set ns = namespace(completed_count=0) %}
+                {% for subtask in task['subtasks'] %}
+                    <li class="task
+                        {% if subtask['completed_at'] is not none %}done{% endif %}
+                        {% if subtask_hidden %}hidden-task{% endif %}"
+                        data-task-id="{{ subtask.id }}">
+                        {{ render_task(subtask, current_task_id, subtask_hidden, 'not_completed') }}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <!-- Подзадачи выполненные -->
+        {% if task['subtasks'] %}
+            <ul class="subtasks {% if hidden %}hidden-task{% endif %} completed-subtasks">
+                {% set ns = namespace(completed_count=0) %}
+                {% for subtask in task['subtasks'] %}
+                    {% if subtask['completed_at'] is not none %}
+                        {% set ns.completed_count = ns.completed_count + 1 %}
+                    {% endif %}
+                    {% set subtask_hidden = ns.completed_count > 5 and subtask['completed_at'] is not none %}
+                    <li class="task
+                        {% if subtask['completed_at'] is not none %}done{% endif %}
+                        {% if subtask_hidden %}hidden-task{% endif %}"
+                        data-task-id="{{ subtask.id }}">
+                        {{ render_task(subtask, current_task_id, subtask_hidden, 'completed') }}
+                    </li>
+                {% endfor %}
+                {% if ns.completed_count > 5 %}
+                    <li class="toggle-more">
+                        <a href="#" onclick="toggleCompletedTasks(this)" draggable="false">еще..</a>
+                    </li>
+                {% endif %}
+            </ul>
+        {% endif %}
+    </li>
+
+    {% endif %}
+{% endmacro %}

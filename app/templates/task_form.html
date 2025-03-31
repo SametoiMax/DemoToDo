@@ -1,0 +1,31 @@
+<form action="/add" method="post" class="add-task-form">
+  <input type="text" name="content" class="task-name" placeholder="Новая задача" required autocomplete="off">
+  <select name="parent_id" id="parent_id" class="parent-select">
+    <option value="">(Главная задача)</option>
+    {% for i in range(all_tasks|length) %}
+      {% set task = all_tasks[i] %}
+      {% set next_task = all_tasks[i+1] if i+1 < all_tasks|length else None %}
+      {% set is_last_child = next_task is none or next_task['parent_id'] != task['parent_id'] %}
+      {% set display_text %}
+        {% if task['depth'] > 0 %}
+          {% if is_last_child %}
+            └─
+          {% else %}
+            ├─
+          {% endif %}
+        {% endif %}
+        {{ task['content'] }}
+      {% endset %}
+      <option value="{{ task['id'] }}"
+        data-parent-id="{{ task['parent_id'] if task['parent_id'] else '' }}"
+        data-original-text="{{ ("&nbsp;&nbsp;&nbsp;" * (task['depth'] - 1)) | safe }}{{ display_text|replace('"','&#34;') }}"
+        data-clean-text="{{ task['content'] }}"
+        {% if task['id'] == selected_parent %}selected{% endif %}>
+        {{ ("&nbsp;&nbsp;&nbsp;" * (task['depth'] - 1)) | safe }}{{ display_text }}
+      </option>
+    {% endfor %}
+  </select>
+  <button type="submit" class="btn">✚</button>
+  <button id="toggle-all" class="btn" data-state="expand">▼</button>
+  <button id="toggle-completed-tasks" class="btn">👁</button>
+</form>

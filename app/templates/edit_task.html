@@ -1,0 +1,32 @@
+<!-- edit_task.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Редактировать задачу</h2>
+
+<form action="/edit/{{ task['id'] }}" method="post">
+    <label>Задача:</label><br>
+    <input type="text" name="content" style="width:600px;" value="{{ task['content'] }}" required><br><br>
+
+    <label>Родительская задача:</label><br>
+    <select name="parent_id" style="width:610px;">
+        <option value="">(Главная задача)</option>
+        {% for t in all_tasks %}
+            <option value="{{ t['id'] }}" {% if t['id'] == task['parent_id'] %}selected{% endif %}>
+                {{ "--- " * t['depth'] }}{{ t['content'] }}
+            </option>
+        {% endfor %}
+    </select><br><br>
+
+    <label>Комментарий:</label><br>
+    <textarea name="comment" style="width:600px; height:150px;">{{ task['comment'] }}</textarea><br><br>
+
+    <button type="submit">💾 Сохранить</button>
+    <a href="/" style="margin-left:10px;">Отмена</a>
+
+    <button type="button" class="delete-task-btn" data-task-id="{{ task['id'] }}">🗑 Удалить задачу</button>
+</form>
+
+<script src="../static/Scripts/delete_confirmation.js"></script>
+
+{% endblock %}

@@ -1,0 +1,117 @@
+#calendar {
+  max-width: 100%; /* Ограничение ширины */
+  max-height: 100%; /* Ограничение по высоте */
+  overflow: auto; /* Если календарь будет слишком большой, прокручиваем */
+}
+
+.flex-container {
+    display: flex;
+    height: calc(100vh - 20px);
+    box-sizing: border-box;
+}
+.left-pane {
+    flex: 0 0 400px; /* фиксированная ширина левой колонки (дерево задач) */
+    border-right: 1px solid #ccc;
+    padding: 10px;
+    overflow-y: auto;
+}
+.right-pane {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+}
+
+.fc-event.selected {
+  border-color: red !important;
+  box-shadow: 0 0 10px red;
+}
+
+.fc-now-indicator {
+  background-color: red;
+  width: 2px;
+}
+
+.fc-day-sun {
+  background-color: #f0f0f0; /* Цвет фона для воскресенья */
+}
+
+.fc-day-sun:hover {
+  background-color: #e0e0e0; /* Цвет фона при наведении */
+}
+
+/* Установим одинаковый стиль для всех кнопок */
+.fc .fc-button-primary {
+    background-color: #f8f8f8;
+    color: #333;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 12px;
+    padding: 2px 5px;
+    transition: background-color 0.3s;
+    margin: 0 4px; /* небольшой отступ слева/справа, чтобы элементы не слипались */
+    box-sizing: border-box; /* чтобы внутренние отступы не ломали верстку */
+}
+
+.fc .fc-button-primary:hover {
+    background-color: #bdbdbd;
+}
+
+.fc .fc-button-primary:disabled {
+    background-color: #bdbdbd;
+}
+
+.fc-event-title{
+    font-size: 12px;
+    color: black;
+}
+
+.fc-event-time{
+    color: black;
+    font-weight: normal;
+}
+
+/* Стиль для завершенных задач */
+.completed-task {
+  background-color: #bdbdbd;
+  color: #3d3d3d;
+  opacity: 0.5;
+  text-decoration: line-through !important;
+}
+
+.fc-event.current-task {
+    background-color: rgba(255, 223, 88, 0.5); !important;/* Светло-желтый фон */
+    border-left: 5px solid #FFA500; !important;/* Оранжевая полоса слева */
+    padding: 1px;
+    font-weight: bold; /* Делаем текст жирнее */
+    max-width: 400px; /* Ограничиваем максимальную ширину */
+}
+
+.fc-event{
+    font-size: 12px;
+    color: black;
+    background-color: #f8f8f8;
+}
+
+.task_priority-star[data-priority="2"] {
+    color: orange;
+    font-size: 12px;
+}
+
+.task_priority-star[data-priority="3"] {
+    color: red;
+    font-size: 14px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
